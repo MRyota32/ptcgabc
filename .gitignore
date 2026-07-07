@@ -1,0 +1,19 @@
+# エンジンバイナリ（Kaggle Dataタブから取得）
+engine/*.so
+engine/*.dll
+cg_tmp/*.so
+cg_tmp/*.dll
+
+# サブミッション用tar.gz（大容量・再生成可）
+*.tar.gz
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
