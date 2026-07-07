@@ -496,8 +496,8 @@ class LucarioPolicy:
                 base = max(base - 4000, 100)
         elif pokemon.id == C.HIPPOWDON:
             if crustle_threat:
-                # おおすなあらし(闘闘●)に必要なのは3エネ。1個ずつ積む
-                base = 9500 if ec < 3 else 200
+                # activeに立ったカバルドンへ最優先でエネを積む（3エネで攻撃可能）
+                base = 25000 if is_active and ec < 3 else (9500 if ec < 3 else 200)
             else:
                 base = 2000 if ec < 3 else 100
         elif pokemon.id == C.HIPPOPOTAS:
@@ -515,27 +515,27 @@ class LucarioPolicy:
         crustle_threat = self._crustle_on_opp_field()
 
         if active.id == C.MEGA_LUCARIO:
+            if crustle_threat:
+                # Crustle対面: カバルドンがベンチにいれば、エネ条件なしで即交代
+                # （エネ3条件は「交代してから貯める」に変更。旧条件が0/60の原因）
+                has_hippo = any(p and p.id == C.HIPPOWDON for p in self.me.bench)
+                if has_hippo:
+                    return 30000  # Lucario最高攻撃スコア(~5600)を確実に上回る
             if self._energy_count(active) >= 1 and not crustle_threat:
                 return -1  # 通常: ルカリオは攻撃継続
-            # Crustle対面: カバルドンが準備できていれば交代
-            if crustle_threat:
-                for p in self.me.bench:
-                    if p and p.id == C.HIPPOWDON and self._energy_count(p) >= 3:
-                        return 9000
             return -1
 
         if active.id == C.HIPPOWDON:
-            if self._energy_count(active) >= 3 and crustle_threat:
-                return -1  # 攻撃できる、退場しない
+            # カバルドンはactiveに居続ける（攻撃するまで退場しない）
             return -1
 
         if active.id == C.RIOLU or active.id == C.HIPPOPOTAS:
             # バトル場に出てしまったたねを下げる
             for p in self.me.bench:
+                if p and p.id == C.HIPPOWDON and crustle_threat:
+                    return 9000
                 if p and p.id == C.MEGA_LUCARIO and self._energy_count(p) >= 1:
                     return 7000
-                if p and p.id == C.HIPPOWDON and self._energy_count(p) >= 3 and crustle_threat:
-                    return 8000
         return -1
 
     # ── Attack ────────────────────────────────────────────────────────────────
@@ -622,8 +622,9 @@ class LucarioPolicy:
             return 5000 + prize_count(card) * 1000
         ec = self._energy_count(card)
         crustle_threat = self._crustle_on_opp_field()
-        if card.id == C.HIPPOWDON and crustle_threat:
-            return 500 + ec * 150  # Crustle対面はカバルドンを前に
+        if card.id == C.HIPPOWDON:
+            # Crustle対面: エネ有無に関わらず最優先でactiveへ
+            return 20000 + ec * 100 if crustle_threat else 200 + ec * 50
         if card.id == C.MEGA_LUCARIO: return 300 + ec * 100
         return ec * 10 + 1
 
