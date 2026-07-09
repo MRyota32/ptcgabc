@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ポケカABC — Lucario Project Dashboard</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #21262d;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #388bfd;
+      --accent2: #3fb950;
+      --warn: #f78166;
+      --gold: #d29922;
+      --purple: #bc8cff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.6; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
+    header h1 { font-size: 18px; font-weight: 600; }
+    header .badge { background: var(--accent); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: 600; }
+    header .deadline { margin-left: auto; font-size: 12px; color: var(--warn); font-weight: 600; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    @media (max-width: 720px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+    .card h2 { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .card h3 { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+
+    .section-title { font-size: 16px; font-weight: 600; margin: 28px 0 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+
+    /* Stat cards */
+    .stat { text-align: center; padding: 20px 16px; }
+    .stat .value { font-size: 32px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .stat .label { font-size: 12px; color: var(--muted); }
+    .stat .ci { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* Win rate bar */
+    .wr-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+    .wr-row .name { width: 80px; flex-shrink: 0; color: var(--muted); font-size: 12px; }
+    .wr-bar-wrap { flex: 1; background: var(--surface2); border-radius: 4px; height: 20px; position: relative; overflow: hidden; }
+    .wr-bar { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+    .wr-pct { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: 600; }
+    .green  { background: #196c2e; }
+    .red    { background: #6a1e1e; }
+    .blue   { background: #0d3980; }
+
+    /* Gate table */
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { background: var(--surface2); color: var(--muted); font-weight: 600; text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    .pass { color: var(--accent2); font-weight: 700; }
+    .fail { color: var(--warn); font-weight: 700; }
+
+    /* Timeline */
+    .timeline { position: relative; padding-left: 20px; }
+    .timeline::before { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 1px; background: var(--border); }
+    .tl-item { position: relative; margin-bottom: 16px; }
+    .tl-item::before { content: ''; position: absolute; left: -17px; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .tl-item.done::before { background: var(--accent2); }
+    .tl-item.retracted::before { background: var(--warn); }
+    .tl-date { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+    .tl-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+    .tl-body { font-size: 12px; color: var(--muted); }
+
+    /* Version cards */
+    .ver-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+    .ver-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
+    .ver-card .ver { font-size: 18px; font-weight: 700; color: var(--accent); }
+    .ver-card .status { font-size: 11px; margin-top: 4px; }
+    .ver-card .note { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px; font-weight: 600; }
+    .tag-active { background: #1a3e1a; color: var(--accent2); }
+    .tag-parity { background: #1a2a3a; color: var(--accent); }
+    .tag-pending { background: #2a2000; color: var(--gold); }
+
+    /* Fact cards */
+    .fact { background: var(--surface2); border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; padding: 10px 14px; margin-bottom: 10px; }
+    .fact .fact-id { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 3px; }
+    .fact .fact-text { font-size: 13px; }
+    .fact .fact-note { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* Role flow */
+    .flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+    .flow-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: 12px; text-align: center; }
+    .flow-box .role { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+    .flow-arrow { color: var(--muted); font-size: 18px; }
+
+    footer { border-top: 1px solid var(--border); padding: 16px 24px; font-size: 12px; color: var(--muted); text-align: center; margin-top: 40px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <span style="font-size:22px">⚡</span>
+  <h1>ポケカABC — Lucario Project</h1>
+  <span class="badge">Kaggle</span>
+  <span class="badge" style="background:#196c2e">Sim + Strategy</span>
+  <span class="deadline">📅 Final: 2026/8/16 | Strategy: 2026/9上旬</span>
+</header>
+
+<div class="container">
+
+  <!-- ── TOP STATS ── -->
+  <div class="grid-3" style="margin-bottom:16px">
+    <div class="card stat">
+      <div class="value" style="color:var(--warn)">17%</div>
+      <div class="label">vs Crustle（v2〜v5）</div>
+      <div class="ci">[13.4, 20.7] N=400</div>
+    </div>
+    <div class="card stat">
+      <div class="value" style="color:var(--accent2)">91%</div>
+      <div class="label">vs Zoroark（v2）</div>
+      <div class="ci">[87.5, 93.2] N=400</div>
+    </div>
+    <div class="card stat">
+      <div class="value" style="color:var(--gold)">+14pt</div>
+      <div class="label">先攻アドバンテージ</div>
+      <div class="ci">64.5% vs 35.5% 複製済み</div>
+    </div>
+  </div>
+
+  <!-- ── META TABLE ── -->
+  <div class="section-title">🏆 メタ3すくみ（N=400/マッチアップ）</div>
+  <div class="card" style="margin-bottom:24px">
+    <table>
+      <thead>
+        <tr>
+          <th>↓が→に勝つ %</th>
+          <th>vs Lucario</th>
+          <th>vs Crustle</th>
+          <th>vs Zoroark</th>
+          <th>平均</th>
+          <th>評価</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Lucario (v2)</strong></td>
+          <td>—</td>
+          <td><span class="fail">17% [13.4, 20.7]</span></td>
+          <td><span class="pass">91% [87.5, 93.2]</span></td>
+          <td>54%</td>
+          <td>Crustle 相性問題</td>
+        </tr>
+        <tr>
+          <td><strong>Crustle</strong></td>
+          <td><span class="pass">83%</span></td>
+          <td>—</td>
+          <td><span class="pass">88% [84.7, 91.0]</span></td>
+          <td><strong>86%</strong></td>
+          <td>ローカル最強</td>
+        </tr>
+        <tr>
+          <td><strong>Zoroark</strong></td>
+          <td><span class="fail">9%</span></td>
+          <td>12%</td>
+          <td>—</td>
+          <td>11%</td>
+          <td>デコイ用途</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted)">
+      ⚠ ローカル序列 Crustle≫Lucario だが、ラダーでは Crustle 404 ≈ Lucario 395（互角）。ローカル絶対勝率でデッキ優劣を判定不可。
+    </div>
+  </div>
+
+  <!-- ── V6 GATE ── -->
+  <div class="section-title">🧪 v6 採否ゲート（事前登録・N=400）</div>
+  <div class="grid-2" style="margin-bottom:24px">
+    <div class="card">
+      <h2>v6(r1) — 交代発火なし版</h2>
+      <table>
+        <thead><tr><th>測定</th><th>結果</th><th>基準</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>vs Crustle</td><td>17.0% [13.6, 21.0]</td><td>CI下限 &gt;25%</td><td><span class="fail">❌</span></td></tr>
+          <tr><td>vs Zoroark</td><td>90.5%</td><td>CI下限 &gt;80%</td><td><span class="pass">✅</span></td></tr>
+          <tr><td>vs v2</td><td>54.2%</td><td>50%含む以上</td><td><span class="pass">✅</span></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:8px;font-size:11px;color:var(--warn)">死因: _score_retreat() でエネ3条件 → Hippowdon active率 0/60</div>
+    </div>
+    <div class="card">
+      <h2>v6(r2) — 0エネ即交代版</h2>
+      <table>
+        <thead><tr><th>測定</th><th>結果</th><th>基準</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>vs Crustle</td><td>14.5% [11.4, 18.3]</td><td>CI下限 &gt;25%</td><td><span class="fail">❌</span></td></tr>
+          <tr><td>vs Zoroark</td><td>89.5%</td><td>CI下限 &gt;80%</td><td><span class="pass">✅</span></td></tr>
+          <tr><td>vs v2</td><td>58.0% [53.1, 62.7]</td><td>50%含む以上</td><td><span class="pass">✅</span></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:8px;font-size:11px;color:var(--gold)">active率は0%→55%に改善。0エネ出撃→グレートシザー2発KOで攻撃機会ゼロ</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:24px;border-left:3px solid var(--gold)">
+    <h3>🔬 v6(r2)→v6(r3) 切り分け結果</h3>
+    <div style="margin-top:8px;font-size:13px;">
+      <strong>H-a（打点不足）: 偽</strong> — おおすなあらし 150dmg = Crustle HP 150 → 1発KO設計は正しい<br>
+      <strong>H-b/H-c（タイミング問題）: 真</strong> — Crustle グレートシザー 120dmg × 2発でHippowdon(HP160)をKO。0エネ出撃なら2ターンで落とされ攻撃機会なし<br>
+      <strong>対処（r3）</strong>: 退場ゲートを「ベンチ2エネ以上」に変更 → 2エネ持ち出撃 → 1T目ぶつかる/おおすなあらし → KO
+    </div>
+  </div>
+
+  <!-- ── VERSION HISTORY ── -->
+  <div class="section-title">📦 エージェント版履歴</div>
+  <div class="ver-grid" style="margin-bottom:24px">
+    <div class="ver-card">
+      <div class="ver">v2</div>
+      <div class="status"><span class="tag tag-active">現チャンプ</span></div>
+      <div class="note">ミラー基準版。デッキv2〜v5共通（md5一致）</div>
+    </div>
+    <div class="ver-card">
+      <div class="ver">v3</div>
+      <div class="status"><span class="tag tag-parity">パリティ</span></div>
+      <div class="note">v2との差: 51.8% CI含む50%</div>
+    </div>
+    <div class="ver-card">
+      <div class="ver">v4</div>
+      <div class="status"><span class="tag tag-parity">パリティ</span></div>
+      <div class="note">偽陽性事件の当事者版。決着実験で撤回</div>
+    </div>
+    <div class="ver-card">
+      <div class="ver">v5</div>
+      <div class="status"><span class="tag tag-parity">非昇格</span></div>
+      <div class="note">後攻改善試み。33.8% vs ベースライン35.5% → 差CI 0跨ぎ</div>
+    </div>
+    <div class="ver-card" style="border-color:var(--gold)">
+      <div class="ver" style="color:var(--gold)">v6</div>
+      <div class="status"><span class="tag tag-pending">r3テスト中</span></div>
+      <div class="note">対Crustle非exテック。カバルドン(2エネゲート修正)</div>
+    </div>
+  </div>
+
+  <!-- ── CONFIRMED FACTS ── -->
+  <div class="section-title">📊 確定した事実（confirmed-facts.md）</div>
+
+  <div class="fact">
+    <div class="fact-id">F-1 ★ 唯一の複製通過済み実体発見</div>
+    <div class="fact-text"><strong>先攻有利 ≈ +14pt</strong>（v2ミラー先攻 64.5% [61.5, 67.4] vs 後攻ベースライン 35.5%、N=1,000）</div>
+    <div class="fact-note">v4でも62.0%と複製。ポリシー非依存で再現。</div>
+  </div>
+
+  <div class="fact">
+    <div class="fact-id">F-2 ミラーパリティ</div>
+    <div class="fact-text"><strong>v2 ≈ v3 ≈ v4 ≈ v5</strong>（全組み合わせ N=1,000。版差は±6pt以内に収まる）</div>
+    <div class="fact-note">ミラーでの版優劣主張は全棄却。</div>
+  </div>
+
+  <div class="fact" style="border-color:var(--warn)">
+    <div class="fact-id">F-4 偽陽性・撤回済み ⚠</div>
+    <div class="fact-text"><strong>「v4最弱・瀕死ロジックが因果」は撤回</strong>。決着実験（事前登録・N=1,000×2）で差 +3.4% [-1.0, +7.8] → 0跨ぎ → 効果なし。機序 = 勝者の呪い（N=240外れ値をベースラインに流用）</div>
+    <div class="fact-note">以後：事前登録・同時対照・複製ゲートを全比較で義務化。</div>
+  </div>
+
+  <div class="fact">
+    <div class="fact-id">F-5 メタ相性</div>
+    <div class="fact-text"><strong>Crustle ≫ Lucario ≫ Zoroark</strong>（三すくみなし。Crustle特性「ex攻撃無効」が直接原因）</div>
+    <div class="fact-note">ラダーではCrustle 404 ≈ Lucario 395 — ローカル絶対勝率でのデッキ優劣判定は不可。</div>
+  </div>
+
+  <div class="fact">
+    <div class="fact-id">F-6 エンジン知見</div>
+    <div class="fact-text"><strong>エンジン非対応カードが存在</strong>（Hyper Aroma id=1082 → errorType=4）。battle_start事前チェック必須化。1試合 ≈ 0.09秒、N=400 ≈ 60秒。</div>
+  </div>
+
+  <!-- ── DECISION LOG ── -->
+  <div class="section-title">📋 意思決定ログ（decision-log.md）</div>
+  <div class="card" style="margin-bottom:24px">
+    <div class="timeline">
+      <div class="tl-item done">
+        <div class="tl-date">D-1</div>
+        <div class="tl-title">ラダーを判定器にしない</div>
+        <div class="tl-body">ローカルハーネス（cabt_harness.py）構築。ラダーEloは収束前ノイズで解像度不足（v4 371 vs v2 395だがローカルでパリティ実証）。</div>
+      </div>
+      <div class="tl-item retracted">
+        <div class="tl-date">D-2 ⚠ 撤回</div>
+        <div class="tl-title">「v4最弱・瀕死が因果」→ 撤回</div>
+        <div class="tl-body">勝者の呪い（N=240外れ値）。決着実験でCI 0跨ぎ → 効果なし。</div>
+      </div>
+      <div class="tl-item done">
+        <div class="tl-date">D-3</div>
+        <div class="tl-title">ミラー全パリティ確認</div>
+        <div class="tl-body">v2≈v3≈v4≈v5。ミラーでの版差主張は棄却。第三者相手（メタ）での比較が必要。</div>
+      </div>
+      <div class="tl-item done">
+        <div class="tl-date">D-4</div>
+        <div class="tl-title">先攻有利 +14pt 承認</div>
+        <div class="tl-body">v2・v4で複製。プロジェクト唯一の承認済み実体発見。</div>
+      </div>
+      <div class="tl-item done">
+        <div class="tl-date">D-5</div>
+        <div class="tl-title">v5非昇格・座席改善凍結</div>
+        <div class="tl-body">後攻改善 33.8% vs ベースライン 35.5%。CI 0跨ぎ → 効果なし。v6再定義へ。</div>
+      </div>
+      <div class="tl-item done">
+        <div class="tl-date">D-6</div>
+        <div class="tl-title">battle_start事前チェックのルール化</div>
+        <div class="tl-body">Hyper Aroma (1082) が errorType=4。以後すべての納品前にチェック義務化。</div>
+      </div>
+      <div class="tl-item done">
+        <div class="tl-date">D-7</div>
+        <div class="tl-title">ルカリオ継続確定（デッキゲート）</div>
+        <div class="tl-body">ガントレット後、転換より適応（非exテック）を選択。</div>
+      </div>
+      <div class="tl-item done">
+        <div class="tl-date">D-8</div>
+        <div class="tl-title">Final仮置き：crustle + v2</div>
+        <div class="tl-body">ローカル序列は外的妥当性なし → 異なるアーキ2本で分散。⚠ Kaggle UI操作要確認。</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">D-9</div>
+        <div class="tl-title">v6 定義（進行中）</div>
+        <div class="tl-body">vs crustle CI下限&gt;25% / vs zoroark CI下限&gt;80% / ミラー50%含む。カバルドン(非ex)テック投入。r3測定待ち。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DEV FLOW ── -->
+  <div class="section-title">🔄 開発フロー（3役割分担）</div>
+  <div class="card" style="margin-bottom:24px">
+    <div class="flow">
+      <div class="flow-box">
+        <div class="role" style="color:var(--purple)">🧠 Fable</div>
+        考える・書く<br><span style="font-size:11px;color:var(--muted)">戦略立案・仮説・writeup</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="role" style="color:var(--accent)">🔧 Cowork</div>
+        作る<br><span style="font-size:11px;color:var(--muted)">main.py・deck.csv実装</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="role" style="color:var(--accent2)">📊 Harness</div>
+        測る<br><span style="font-size:11px;color:var(--muted)">N=400 CI判定</span>
+      </div>
+      <div class="flow-arrow">↺</div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px">
+      <strong>測定プロトコル:</strong> 事前登録 → balanced（先後各50%）→ Wilson CI → 複製ゲート通過で昇格<br>
+      <strong>偽陽性防止:</strong> N≥400・同一セッション・複製ゲート義務化（D-2の教訓）
+    </div>
+  </div>
+
+  <!-- ── REPO STRUCTURE ── -->
+  <div class="section-title">📁 リポジトリ</div>
+  <div class="card" style="margin-bottom:24px">
+    <div style="display:flex;gap:24px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">主要ディレクトリ</div>
+        <pre style="font-size:12px;color:var(--text);line-height:1.8;background:none;border:none">ptcgabc/
+├── AGENTS.md          ← ルーター（まずここ）
+├── docs/agent/        ← 知識ベース
+├── agents/
+│   ├── lucario/v2〜v6/
+│   └── opponents/
+├── prompts/           ← AI間依頼テンプレ
+├── skills/            ← eval・handoff
+└── scripts/
+    ├── check_deck_legal.py
+    └── validate_docs.py</pre>
+      </div>
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">重要ルール</div>
+        <ul style="font-size:12px;line-height:2;list-style:none;padding:0">
+          <li>✅ 納品前 <code>check_deck_legal.py</code> 必須</li>
+          <li>✅ 版比較は N≥400・事前登録</li>
+          <li>✅ 確定事実は confirmed-facts.md のみ</li>
+          <li>❌ ラダーEloを判定器に使わない</li>
+          <li>❌ 旧版ファイル（v1_OBSOLETE）参照禁止</li>
+        </ul>
+        <div style="margin-top:12px">
+          <a href="https://github.com/MRyota32/ptcgabc" target="_blank" style="background:var(--surface2);border:1px solid var(--border);padding:6px 12px;border-radius:6px;font-size:12px;display:inline-block">
+            🔗 GitHub リポジトリ
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── NEXT ACTIONS ── -->
+  <div class="section-title">⏭ 次のアクション</div>
+  <div class="grid-2">
+    <div class="card">
+      <h2>Sim トラック</h2>
+      <ul style="font-size:13px;line-height:2.2;list-style:none;padding:0">
+        <li>🔄 v6(r3) 測定（vs crustle / zoroark / v2）</li>
+        <li>⚠ Kaggle Final 仮置き確認（crustle + v2）</li>
+        <li>📅 8/16 Final Submission 締切</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Strategy トラック</h2>
+      <ul style="font-size:13px;line-height:2.2;list-style:none;padding:0">
+        <li>📝 writeup/ に corrected v2 文書を配置</li>
+        <li>🔬 外的妥当性（ローカル↔ラダー照合）</li>
+        <li>📅 8/17–31 ラダー収束期間 → 9月上旬提出</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  ポケカABC — Lucario Project &nbsp;|&nbsp; <a href="https://github.com/MRyota32/ptcgabc">github.com/MRyota32/ptcgabc</a> &nbsp;|&nbsp;
+  Last updated: 2026-07-09
+</footer>
+
+</body>
+</html>
