@@ -1,13 +1,41 @@
 """
-lucario v6 — Mega Lucario ex + カバルドン デッキテック版
+field_lucario_ex — ラダー実観測デッキの再現（測定用相手役）
 
-v6の変更点：
-- デッキ：ヒポポタス(22)×2 + カバルドン(23)×2 を投入。Fighting Energy 31→27枚。
-- 戦略分岐：相手の場にCrustle(id=345)がいる場合はカバルドン(おおすなあらし・150dmg)で攻撃。
-  Crustleがいない場合は従来どおりMega Lucario exのテンポ連打。
-- 根拠：Crustleの特性「Mysterious Rock Inn」はex攻撃を完全無効化。
-  敗戦の85%がプライズ0枚の完封負け（N=100の一次分析で確定）。
-  非exアタッカー投入が唯一の構造的解。
+目的：「勝つエージェント」ではなく、ラダーに実在する Mega Lucario ex 系を
+ローカルで安定再現し、測定の外的妥当性を高める相手役。
+
+観測元：ラダー 9 戦中 2 戦で対面した Mega Lucario ex 系デッキ
+（濱津祐貴376, Aditya Sasidhar442 戦のスクショより）
+
+── デッキ構成（v2 との差分） ───────────────────────────────────────────────
+追加（観測フィールド準拠）：
+  Riolu 333 (HP70)          ×4  ← Poffin 対応。v2 は 677(HP80)
+  Makuhita (673)             ×2  ← 闘サブアタッカーライン種
+  Hariyama (674)             ×2  ← ワイルドプレス 210dmg、どすこいキャッチャー特性
+  Buddy-Buddy Poffin (1086)  ×2  ← HP70 以下たねをベンチへ（Riolu 333 対応）
+  Dusk Ball (1102)           ×3  ← 山札下7枚からポケモン確保
+  Gong / ファイトゴング(1142) ×4  ← 闘たね or 基本闘エネをサーチ
+  Drayton / タラゴン(1238)   ×2  ← トラッシュから闘ポケモン+闘エネ計4枚回収
+  Scramble Switch (1107)     ×1  ← 入れ替え＋エネ付け替え（1枚制限の可能性あり）
+  Night Stretcher (1097)     ×1  ← トラッシュ回収（v2 同等）
+  Mitsuru (1229)             ×2  ← メガシンカexを全回復＋エネ手札戻し
+  Takeshi's Scout (1210)     ×2  ← たね2枚 or 進化1枚をサーチ
+
+除外（v2 からの差分）：
+  Ultra Ball (1121)          → Dusk Ball / Gong / Poffin で代替
+  Canari (1233)              → 雷専用サーチのため Fighting デッキでは無効
+  Levincia (1254)            → フィールド観測で見えなかったため除外
+  Energy Retrieval (1118)    → Drayton (1238) で代替
+  Max Rod (1110)             → Drayton で代替
+
+── Hariyama 特性メモ ────────────────────────────────────────────────────────
+「どすこいキャッチャー」：手札から出して進化させたとき1回使える。
+相手のベンチポケモン1匹をバトルポケモンと入れ替えさせる。
+→ エンジンが SWITCH / TO_ACTIVE コンテキストで選択を求める可能性あり。
+  ターゲット：プライズ数が多い（ex/Mega）or HP が低い相手を優先。
+
+ワイルドプレス：闘闘闘 → 210dmg（自分にも 70 dmg）。
+→ HP150 を1発 KO 可能。自傷 70 で残 HP80 → 次ターン倒される可能性あり。
 """
 from __future__ import annotations
 
@@ -38,20 +66,20 @@ except Exception:
 
 # ── Card IDs ──────────────────────────────────────────────────────────────────
 class C:
-    RIOLU          = 677
-    MEGA_LUCARIO   = 678
-    HIPPOPOTAS     = 22   # ヒポポタス (たね・HP90)
-    HIPPOWDON      = 23   # カバルドン (1進化・HP160・おおすなあらし闘闘●150dmg)
-    CRUSTLE        = 345  # イワパレス — 特性でex攻撃を完全無効化
-    FIGHTING_ENERGY= 6
-    ULTRA_BALL     = 1121
-    LILLIE_DET     = 1227
-    CANARI         = 1233
-    NIGHT_STRETCHER= 1097
-    POKE_PAD       = 1152
-    LEVINCIA       = 1254
-    MAX_ROD        = 1110
-    ENERGY_RET     = 1118
+    RIOLU           = 333   # HP70 — Poffin でサーチ可能
+    MEGA_LUCARIO    = 678   # Mega Lucario ex (1進化)
+    MAKUHITA        = 673   # HP80 — サブアタッカーライン種
+    HARIYAMA        = 674   # HP150 — ワイルドプレス210dmg/どすこいキャッチャー特性
+    FIGHTING_ENERGY = 6
+    LILLIE_DET      = 1227  # リーリエの決心: 手札→山札→6枚(or8枚)ドロー
+    MITSURU         = 1229  # ミツルの思いやり: Mega ex 全回復+エネ手札戻し
+    TAKESHI         = 1210  # タケシのスカウト: たね2枚 or 進化1枚サーチ
+    POFFIN          = 1086  # なかよしポフィン: HP70以下たね2枚ベンチへ
+    DUSK_BALL       = 1102  # ダークボール: 山札下7枚からポケモン1枚
+    GONG            = 1142  # ファイトゴング: 闘たね or 基本闘エネサーチ
+    DRAYTON         = 1238  # タラゴン: トラッシュから闘ポケモン+闘エネ計4枚
+    SCRAMBLE_SW     = 1107  # スクランブルスイッチ: 入れ替え+エネ付け替え
+    NIGHT_STRETCHER = 1097  # 夜のタンカ: トラッシュ回収
 
 
 LOW_DECK_COUNT = 6
@@ -210,7 +238,7 @@ def _build_predictions(obs):
 
 
 def _evaluate_obs(obs):
-    """1-ply search の評価関数。v6: Crustle対面でカバルドンの価値を加算。"""
+    """1-ply search 評価関数。Hariyama の攻撃準備状況を加味。"""
     if obs is None or obs.current is None: return 0
     state  = obs.current
     my_idx = state.yourIndex
@@ -222,9 +250,6 @@ def _evaluate_obs(obs):
 
     score = (len(opp.prize) - len(me.prize)) * 8_000
 
-    # 相手の場にCrustleがいるか（単純判定）
-    opp_has_crustle = any(p and p.id == C.CRUSTLE for p in opp.active + opp.bench)
-
     for p in me.active + me.bench:
         if p is None: continue
         ec = len(p.energies)
@@ -233,15 +258,11 @@ def _evaluate_obs(obs):
             if ec >= 2: score += 1_000
         elif p.id == C.RIOLU:
             score += 500
-        elif p.id == C.HIPPOWDON:
-            # Crustle対面ではカバルドンに高い価値をつける
-            if opp_has_crustle:
-                score += 3_500 + ec * 900
-                if ec >= 3: score += 1_500  # 攻撃可能
-            else:
-                score += 600 + ec * 200
-        elif p.id == C.HIPPOPOTAS:
-            score += 300 if opp_has_crustle else 80
+        elif p.id == C.HARIYAMA:
+            score += 2_000 + ec * 600
+            if ec >= 3: score += 1_500  # ワイルドプレス可能
+        elif p.id == C.MAKUHITA:
+            score += 300 + ec * 100
 
     opp_a = opp.active[0] if opp.active else None
     if opp_a:
@@ -259,7 +280,7 @@ def _greedy_resolve(state, my_orig_idx, depth=0):
     if obs.current.yourIndex != my_orig_idx: return state
     if obs.select.maxCount == 0 or not obs.select.option: return state
     try:
-        policy = LucarioPolicy(obs)
+        policy = FieldLucarioPolicy(obs)
         choices = policy.choose()
         if not choices: return state
         nxt = _search_step(state.searchId, choices)
@@ -285,7 +306,7 @@ def _run_lookahead(obs):
     except Exception:
         return None
 
-    p0 = LucarioPolicy(obs)
+    p0 = FieldLucarioPolicy(obs)
     h = [p0._score_option(o) for o in obs.select.option]
     n = len(obs.select.option)
     top_k = sorted(range(n), key=lambda i: h[i], reverse=True)[:SEARCH_TOP_K]
@@ -309,8 +330,8 @@ def _run_lookahead(obs):
     return best_idx
 
 
-# ── Lucario v6 policy ──────────────────────────────────────────────────────────
-class LucarioPolicy:
+# ── Field Lucario ex policy ───────────────────────────────────────────────────
+class FieldLucarioPolicy:
     def __init__(self, obs):
         self.obs      = obs
         self.state    = obs.current
@@ -348,24 +369,17 @@ class LucarioPolicy:
     def _lucario_count(self):
         return sum(1 for p in self._my_board() if p and p.id == C.MEGA_LUCARIO)
 
-    def _hippowdon_count(self):
-        return sum(1 for p in self._my_board() if p and p.id == C.HIPPOWDON)
+    def _hariyama_count(self):
+        return sum(1 for p in self._my_board() if p and p.id == C.HARIYAMA)
 
-    # ── v6 コアメソッド：Crustle検出 ─────────────────────────────────────────
-    def _crustle_on_opp_field(self) -> bool:
-        """相手の場（バトル場 + ベンチ）にCrustle(id=345)がいるか。単純判定。"""
-        return any(p and p.id == C.CRUSTLE for p in self._opp_board())
-
-    def _hippowdon_ready(self) -> bool:
-        """攻撃可能なカバルドン（エネルギー3個以上）がいるか。"""
-        return any(p and p.id == C.HIPPOWDON and self._energy_count(p) >= 3
-                   for p in self._my_board())
-
-    def _attack_ids(self):
-        data = card_table.get(C.MEGA_LUCARIO)
-        if data is None or not hasattr(data, "attacks") or len(data.attacks) < 2:
-            return None, None
-        return data.attacks[0], data.attacks[1]
+    def _active_hp_ratio(self):
+        """アクティブの HP 残率（低いほどリトリート・Mitsuru が有効）。"""
+        try:
+            a = self.me.active[0]
+            if a is None or a.maxHp == 0: return 1.0
+            return a.hp / a.maxHp
+        except Exception:
+            return 1.0
 
     # ── Main scorer ────────────────────────────────────────────────────────────
     def rank(self):
@@ -405,62 +419,90 @@ class LucarioPolicy:
 
     def _score_play_pokemon(self, card) -> float:
         n = self.field_counts[card.id]
-        crustle_threat = self._crustle_on_opp_field()
 
         if card.id == C.RIOLU:
             return 20000 - 300 * n if self._open_bench() else -1
-        if card.id == C.HIPPOPOTAS:
-            # Crustle対面なら高優先（カバルドンへの進化ラインを早期確立）
-            if crustle_threat and self._hippowdon_count() == 0:
-                return 18000 - 200 * n if self._open_bench() else -1
-            return 8000 - 200 * n if self._open_bench() else -1
+        if card.id == C.MAKUHITA:
+            # Hariyama が場にいない間はライン確保を優先
+            return (16000 - 300 * n if self._hariyama_count() == 0
+                    else 9000 - 200 * n) if self._open_bench() else -1
         return 15000 - 200 * n
 
     def _score_play_trainer(self, card) -> float:
         cid = card.id
-        crustle_threat = self._crustle_on_opp_field()
 
+        # ── サポート ─────────────────────────────────────────────────────────
         if cid == C.LILLIE_DET:
             if self.state.supporterPlayed or self._low_deck(): return -1
             return 12000 if self._hand_size() <= 4 else 3000
 
-        if cid == C.CANARI:
+        if cid == C.MITSURU:
             if self.state.supporterPlayed: return -1
-            # Crustle対面ではカバルドンラインの確保を優先
-            if crustle_threat and self._hippowdon_count() == 0:
-                return 12000
-            need = self._lucario_count() < 2
-            return 11000 if need else (9500 if self._hand_size() <= 3 else 1500)
+            active = self.me.active[0] if self.me.active else None
+            # Mega ex がアクティブで HP が半分以下なら回復価値大
+            if active and active.id == C.MEGA_LUCARIO and self._active_hp_ratio() <= 0.5:
+                return 11000
+            # HP残り多いうちは使わない（エネ全戻しのデメリットがある）
+            return 1500
 
-        if cid == C.ULTRA_BALL:
-            need = self._lucario_count() < 2 or self.field_counts[C.RIOLU] < 2
-            if crustle_threat and self._hippowdon_count() == 0:
-                need = True
-            return 10000 if need and self._hand_size() >= 3 else 500
+        if cid == C.TAKESHI:
+            if self.state.supporterPlayed: return -1
+            need_riolu = self.field_counts[C.RIOLU] + self._lucario_count() < 2
+            need_makuhita = self.field_counts[C.MAKUHITA] + self._hariyama_count() < 1
+            return 10000 if (need_riolu or need_makuhita) else 3000
+
+        # ── グッズ ─────────────────────────────────────────────────────────
+        if cid == C.POFFIN:
+            # Riolu 333 (HP70) をベンチへ — open bench 必須
+            need = self.field_counts[C.RIOLU] < 2
+            return 13000 if (need and self._open_bench()) else 500
+
+        if cid == C.DUSK_BALL:
+            # 山札下7枚からポケモン確保（Makuhita/Hariyama/Riolu/Lucario 狙い）
+            need = (self._lucario_count() < 2 or
+                    self.field_counts[C.RIOLU] + self._lucario_count() < 2 or
+                    self._hariyama_count() < 1)
+            return 10000 if need else 4000
+
+        if cid == C.GONG:
+            # 闘たね（Riolu/Makuhita）or 基本闘エネをサーチ
+            need_mon = self.field_counts[C.RIOLU] < 2 or self.field_counts[C.MAKUHITA] < 1
+            if need_mon:
+                return 10500
+            # エネが手札に少ない場合は闘エネをサーチ
+            if self.hand_counts.get(C.FIGHTING_ENERGY, 0) < 2:
+                return 8000
+            return 3000
+
+        if cid == C.DRAYTON:
+            # トラッシュから闘ポケモン+闘エネ回収
+            has_mon  = (self.disc_counts.get(C.MEGA_LUCARIO, 0) > 0 or
+                        self.disc_counts.get(C.HARIYAMA, 0) > 0 or
+                        self.disc_counts.get(C.RIOLU, 0) > 0)
+            has_ene  = self.disc_counts.get(C.FIGHTING_ENERGY, 0) >= 2
+            if has_mon and has_ene: return 9000
+            if has_mon or has_ene: return 6000
+            return 500
+
+        if cid == C.SCRAMBLE_SW:
+            # 入れ替え + エネ付け替え：Hariyama をアクティブへ置き換えるとき最適
+            active = self.me.active[0] if self.me.active else None
+            if active and active.id not in (C.MEGA_LUCARIO, C.HARIYAMA):
+                # Riolu/Makuhita がアクティブにいる = 逃がしたい
+                return 9500
+            # Hariyama がエネ満載でベンチにいて Lucario がアクティブなら交代も有効
+            for p in self.me.bench:
+                if p and p.id == C.HARIYAMA and self._energy_count(p) >= 3:
+                    return 8500
+            return 2000
 
         if cid == C.NIGHT_STRETCHER:
-            has_lucario   = self.disc_counts.get(C.MEGA_LUCARIO, 0) > 0
-            has_riolu     = self.disc_counts.get(C.RIOLU, 0) > 0
-            has_hippowdon = self.disc_counts.get(C.HIPPOWDON, 0) > 0
-            if crustle_threat and has_hippowdon:
-                return 10000
-            return 9000 if has_lucario else (7000 if has_riolu else 300)
-
-        if cid == C.POKE_PAD:
-            if crustle_threat and self._hippowdon_count() == 0:
-                return 9000  # カバルドンをサーチ
-            return 8000 if self._lucario_count() < 2 else 400
-
-        if cid == C.ENERGY_RET:
-            fe_disc = self.disc_counts.get(C.FIGHTING_ENERGY, 0)
-            return 6000 if fe_disc >= 3 else 1000
-
-        if cid == C.MAX_ROD:
-            return 5000 if self.me.deckCount <= 10 else 400
-
-        if cid == C.LEVINCIA:
-            if self.state.stadiumPlayed: return -1
-            return 3000
+            has_lucario  = self.disc_counts.get(C.MEGA_LUCARIO, 0) > 0
+            has_riolu    = self.disc_counts.get(C.RIOLU, 0) > 0
+            has_hariyama = self.disc_counts.get(C.HARIYAMA, 0) > 0
+            if has_lucario or has_hariyama: return 8500
+            if has_riolu:                   return 6000
+            return 300
 
         return 7000
 
@@ -473,10 +515,9 @@ class LucarioPolicy:
 
         if card.id == C.MEGA_LUCARIO:
             return 25000 + self._energy_count(target) * 50
-        if card.id == C.HIPPOWDON:
-            # Crustle対面なら最優先で進化
-            bonus = 5000 if self._crustle_on_opp_field() else 0
-            return 22000 + self._energy_count(target) * 50 + bonus
+        if card.id == C.HARIYAMA:
+            # どすこいキャッチャー特性 = 進化するだけで相手を引き出せる
+            return 22000 + self._energy_count(target) * 50
         return 18000
 
     # ── Attach ────────────────────────────────────────────────────────────────
@@ -487,21 +528,15 @@ class LucarioPolicy:
 
     def _energy_score(self, pokemon, is_active) -> float:
         ec = self._energy_count(pokemon)
-        crustle_threat = self._crustle_on_opp_field()
 
         if pokemon.id == C.MEGA_LUCARIO:
             base = 9000 if ec < 2 else 500
-            # Crustle対面ではルカリオにエネを積む優先度を下げる（攻撃できないため）
-            if crustle_threat:
-                base = max(base - 4000, 100)
-        elif pokemon.id == C.HIPPOWDON:
-            if crustle_threat:
-                # activeに立ったカバルドンへ最優先でエネを積む（3エネで攻撃可能）
-                base = 25000 if is_active and ec < 3 else (9500 if ec < 3 else 200)
-            else:
-                base = 2000 if ec < 3 else 100
-        elif pokemon.id == C.HIPPOPOTAS:
-            base = 50  # Hippopotasにはエネを積まない（進化させる）
+        elif pokemon.id == C.HARIYAMA:
+            # ワイルドプレスは闘闘闘 = 3エネ。3エネ到達を優先。
+            base = 10000 if ec < 3 else 200
+        elif pokemon.id == C.MAKUHITA:
+            # 進化前は最低限のエネだけ（進化後 Hariyama に付け替わる）
+            base = 500 if ec == 0 else 50
         elif pokemon.id == C.RIOLU:
             base = 100
         else:
@@ -512,33 +547,25 @@ class LucarioPolicy:
     def _score_retreat(self) -> float:
         active = self.me.active[0] if self.me.active else None
         if active is None: return -1
-        crustle_threat = self._crustle_on_opp_field()
 
         if active.id == C.MEGA_LUCARIO:
-            if crustle_threat:
-                # Crustle対面: カバルドンがベンチで2エネ溜まったら交代
-                # ・0エネ交代(r2)→即2発KO でアタック機会ゼロが死因
-                # ・2エネ持って出れば: 1T目おおすなあらし(3枚目アタッチ後)or ぶつかる → 2T目KO
-                # ・グレートシザー120×2発でKO(160→40→0)の耐久と合致
-                has_hippo_2en = any(p and p.id == C.HIPPOWDON and self._energy_count(p) >= 2
-                                    for p in self.me.bench)
-                if has_hippo_2en:
-                    return 30000  # Lucario最高攻撃スコア(~5600)を確実に上回る
-            if self._energy_count(active) >= 1 and not crustle_threat:
-                return -1  # 通常: ルカリオは攻撃継続
-            return -1
+            if self._energy_count(active) >= 1:
+                return -1  # 攻撃継続
+            # エネなし Lucario はベンチに下げて Hariyama/Riolu を前へ
+            return 3000
 
-        if active.id == C.HIPPOWDON:
-            # カバルドンはactiveに居続ける（攻撃するまで退場しない）
-            return -1
+        if active.id == C.HARIYAMA:
+            return -1  # Hariyama はアクティブで攻撃し続ける
 
-        if active.id == C.RIOLU or active.id == C.HIPPOPOTAS:
-            # バトル場に出てしまったたねを下げる
+        # Riolu / Makuhita がアクティブ → 下げる
+        if active.id in (C.RIOLU, C.MAKUHITA):
             for p in self.me.bench:
-                if p and p.id == C.HIPPOWDON and crustle_threat:
-                    return 9000
                 if p and p.id == C.MEGA_LUCARIO and self._energy_count(p) >= 1:
+                    return 8000
+                if p and p.id == C.HARIYAMA:
                     return 7000
+            return 3000
+
         return -1
 
     # ── Attack ────────────────────────────────────────────────────────────────
@@ -546,27 +573,26 @@ class LucarioPolicy:
         active = self.me.active[0] if self.me.active else None
         opp_a  = self.opponent.active[0] if self.opponent.active else None
         if active is None: return 500
-        crustle_threat = self._crustle_on_opp_field()
 
-        # ── カバルドンの攻撃 ──────────────────────────────────────────────────
-        if active.id == C.HIPPOWDON:
-            dmg = 150  # おおすなあらし
-            score = 4000 + min(dmg, 340)
+        # ── Hariyama の攻撃（ワイルドプレス 210dmg、自 70dmg） ────────────
+        if active.id == C.HARIYAMA:
+            dmg = 210
+            score = 4500 + min(dmg, 340)
             if opp_a and opp_a.hp <= dmg:
                 score += 3000 + prize_count(opp_a) * 500
-            if crustle_threat:
-                score += 6000  # Crustle対面では最優先
+            # 自傷 70 で瀕死になる場合は警戒（残 HP80 → 相手の攻撃で落とされやすい）
+            if active.hp - 70 <= 0:
+                score -= 2000  # 自爆は避けたい
             return score
 
-        # ── Mega Lucario ex の攻撃 ────────────────────────────────────────────
+        # ── Mega Lucario ex の攻撃 ────────────────────────────────────────
         if active.id != C.MEGA_LUCARIO:
             return 500
 
-        # Crustle対面でルカリオが攻撃しても0ダメ → 大きくペナルティ
-        if crustle_threat and opp_a and opp_a.id == C.CRUSTLE:
-            return -5000
-
-        aura_id, brave_id = self._attack_ids()
+        data = card_table.get(C.MEGA_LUCARIO)
+        aura_id = brave_id = None
+        if data and hasattr(data, "attacks") and len(data.attacks) >= 2:
+            aura_id, brave_id = data.attacks[0], data.attacks[1]
 
         if option.attackId == brave_id:
             dmg = 270
@@ -596,8 +622,9 @@ class LucarioPolicy:
         if ctx in (SelectContext.SWITCH, SelectContext.TO_ACTIVE):
             return self._score_active_switch(option, card)
         if ctx == SelectContext.SETUP_ACTIVE_POKEMON:
+            # セットアップ時は Riolu を優先
             if isinstance(card, Pokemon) and card.id == C.RIOLU: return 6
-            if isinstance(card, Pokemon) and card.id == C.HIPPOPOTAS: return 3
+            if isinstance(card, Pokemon) and card.id == C.MAKUHITA: return 3
             return 1
         if ctx in (SelectContext.SETUP_BENCH_POKEMON, SelectContext.TO_BENCH, SelectContext.TO_FIELD):
             return self._score_to_bench(card)
@@ -622,28 +649,26 @@ class LucarioPolicy:
     def _score_active_switch(self, option, card) -> float:
         if not isinstance(card, Pokemon): return 0
         if option.playerIndex == self.op_index:
+            # Hariyama どすこいキャッチャー or Scramble Switch: 高プライズのものを引き出す
             return 5000 + prize_count(card) * 1000
+        # 自分側の交代先: Hariyama (エネあり) > Lucario (エネあり) > その他
         ec = self._energy_count(card)
-        crustle_threat = self._crustle_on_opp_field()
-        if card.id == C.HIPPOWDON:
-            # Crustle対面: エネ有無に関わらず最優先でactiveへ
-            return 20000 + ec * 100 if crustle_threat else 200 + ec * 50
-        if card.id == C.MEGA_LUCARIO: return 300 + ec * 100
+        if card.id == C.HARIYAMA: return 15000 + ec * 200
+        if card.id == C.MEGA_LUCARIO: return 8000 + ec * 200
         return ec * 10 + 1
 
     def _score_to_bench(self, card) -> float:
         if not isinstance(card, Pokemon): return 0
         n = self.field_counts[card.id]
-        if card.id == C.RIOLU:       return 200 - 40 * n
-        if card.id == C.MEGA_LUCARIO:return 150 - 30 * n
-        if card.id == C.HIPPOPOTAS:  return 120 - 30 * n
-        if card.id == C.HIPPOWDON:   return 100 - 20 * n
+        if card.id == C.RIOLU:        return 200 - 40 * n
+        if card.id == C.MEGA_LUCARIO: return 150 - 30 * n
+        if card.id == C.MAKUHITA:     return 120 - 30 * n
+        if card.id == C.HARIYAMA:     return 100 - 20 * n
         return 50
 
     def _score_to_hand(self, card) -> float:
         if card is None: return 0
         cid = card.id
-        crustle_threat = self._crustle_on_opp_field()
         s = 150 - self.hand_counts[cid] * 60
 
         if cid == C.MEGA_LUCARIO:
@@ -656,17 +681,10 @@ class LucarioPolicy:
         elif cid == C.RIOLU:
             total = self.field_counts[C.RIOLU] + self._lucario_count()
             s += 300 if total < 1 else (150 if total < 2 else -20)
-        elif cid == C.HIPPOWDON:
-            if crustle_threat:
-                # カバルドンが手札にないなら高優先でサーチ
-                s += 350 if self._hippowdon_count() == 0 else 100
-            else:
-                s += 80
-        elif cid == C.HIPPOPOTAS:
-            if crustle_threat and self._hippowdon_count() == 0:
-                s += 200
-            else:
-                s += 60
+        elif cid == C.HARIYAMA:
+            s += 350 if self._hariyama_count() == 0 else 100
+        elif cid == C.MAKUHITA:
+            s += 200 if self.field_counts[C.MAKUHITA] + self._hariyama_count() < 1 else 50
         elif cid == C.FIGHTING_ENERGY:
             s += 40
         elif cid == C.NIGHT_STRETCHER:
@@ -680,16 +698,16 @@ class LucarioPolicy:
         if self.hand_counts[cid] >= 2: return 60
         if cid in (C.RIOLU, C.MEGA_LUCARIO):
             return 5 if self.field_counts[cid] > 0 else -80
-        if cid in (C.HIPPOPOTAS, C.HIPPOWDON):
+        if cid in (C.MAKUHITA, C.HARIYAMA):
             return 5 if self.field_counts[cid] > 0 else -60
-        if cid in (C.LILLIE_DET, C.CANARI) and self.state.supporterPlayed:
+        if cid in (C.LILLIE_DET, C.MITSURU, C.TAKESHI) and self.state.supporterPlayed:
             return 30
         return 5
 
     def _score_putback(self, card) -> float:
         if card is None: return 0
         cid = card.id
-        if cid in (C.RIOLU, C.MEGA_LUCARIO, C.HIPPOPOTAS, C.HIPPOWDON): return -40
+        if cid in (C.RIOLU, C.MEGA_LUCARIO, C.MAKUHITA, C.HARIYAMA): return -40
         if self.hand_counts[cid] >= 2:   return 50
         if cid == C.FIGHTING_ENERGY:     return 20
         return 10
@@ -715,7 +733,7 @@ def agent(obs_dict: dict) -> list[int]:
             return my_deck
 
         try:
-            policy = LucarioPolicy(obs)
+            policy = FieldLucarioPolicy(obs)
 
             search_idx = None
             try:

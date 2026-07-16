@@ -1,0 +1,37 @@
+=== field_lucario_ex battle_start チェックログ ===
+実施日: 2026-07-12
+
+── 静的チェック（ローカル）─────────────────────────────────────────────
+総枚数:      60 / 60  [OK]
+4枚制限:     全カードクリア（基本エネ除外）[OK]
+1枚制限疑い: Scramble Switch(1107) ×1 積み — 安全側で1枚に限定済み
+
+── カード構成 ─────────────────────────────────────────────────────────
+id=   6 x27  Fighting Energy
+id= 333 x4   Riolu (HP70)         ← Poffin 対応 (HP≤70)
+id= 673 x2   Makuhita
+id= 674 x2   Hariyama
+id= 678 x4   Mega Lucario ex
+id=1086 x2   Buddy-Buddy Poffin
+id=1097 x1   Night Stretcher
+id=1102 x3   Dusk Ball
+id=1107 x1   Scramble Switch      ← 念のため1枚制限
+id=1142 x4   Gong (ファイトゴング)
+id=1210 x2   Takeshi's Scout (タケシのスカウト)
+id=1227 x4   Lillie's Determination
+id=1229 x2   Mitsuru
+id=1238 x2   Drayton (タラゴン)
+
+── エンジンチェック ────────────────────────────────────────────────────
+battle_start(deck, deck): エンジン(libcg/cg.api)はKaggle環境でのみ利用可能。
+ローカル環境ではモジュール不在のため実行不可。
+Kaggle提出時に battle_start(DECK, DECK).errorPlayer == -1 を必ず確認すること。
+
+注意カード:
+- id=333  (Riolu HP70): v6では677(HP80)を使用。333が678に進化できるかKaggle環境で要確認
+- id=673/674 (Makuhita/Hariyama): 今回初登場カード。errorType=4 の可能性あり
+- id=1086 (Poffin): 今回初登場。同上
+- id=1102 (Dusk Ball): 今回初登場。同上
+- id=1107 (Scramble Switch): 今回初登場。1枚制限の可能性あり
+- id=1142 (Gong): 今回初登場。同上
+- id=1238 (Drayton): 今回初登場。同上

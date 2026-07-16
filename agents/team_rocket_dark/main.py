@@ -1,13 +1,39 @@
 """
-lucario v6 — Mega Lucario ex + カバルドン デッキテック版
+team_rocket_dark — ロケット団バンギラスライン（crustleキラー / 非exメタ）
 
-v6の変更点：
-- デッキ：ヒポポタス(22)×2 + カバルドン(23)×2 を投入。Fighting Energy 31→27枚。
-- 戦略分岐：相手の場にCrustle(id=345)がいる場合はカバルドン(おおすなあらし・150dmg)で攻撃。
-  Crustleがいない場合は従来どおりMega Lucario exのテンポ連打。
-- 根拠：Crustleの特性「Mysterious Rock Inn」はex攻撃を完全無効化。
-  敗戦の85%がプライズ0枚の完封負け（N=100の一次分析で確定）。
-  非exアタッカー投入が唯一の構造的解。
+目的：Final Submission 第2枠候補。crustle の穴（非ex環境）を埋める。
+
+── 勝ち筋 ───────────────────────────────────────────────────────────────────
+Tyranitar (442) ぶちぬきタックル：闘●●●, 180dmg, 相手エネ1個トラッシュ
+  → Crustle(HP150)を一撃。非exなので Mysterious Rock Inn を素通り。
+Tyranitar 特性「すなおこし」：バトル場にいる限り、ポケモンチェックのたびに
+  相手のたねポケモン全員に20ダメカン × 毎ターン。相手の展開をじわじわ削る。
+
+── Stage2 安定化の工夫 ───────────────────────────────────────────────────────
+Pupitar (441) ばくれつかくせい：●, 30dmg + 山札からバンギラスを選んで即進化。
+  → 1エネで Pupitar 攻撃 → Tyranitar が即座にフィールドへ。Rare Candy 不要。
+  → Larvitar×4 / Pupitar×4 の 8枚体制で序盤事故を防ぐ（crustle教訓）。
+
+── エネルギー設計 ─────────────────────────────────────────────────────────
+Fighting Energy(6)×18 + TR Energy(15)×8。
+  Tyranitar 闘●●●: Fighting×1(闘要件) + 残●●● は TR Energy 2個(=●●●●)で充足。
+  実質 1 Fighting + 2 TR Energy（3枚=4要件充足）で攻撃可能。
+  Pupitar ●: Fighting or TR Energy 1枚で OK。
+
+── Arbok 不採用の理由 ────────────────────────────────────────────────────────
+Arbok(449) は悪悪悪の3エネ技が必要 → 悪エネ基盤が必要 → Tyranitar の闘エネと
+2タイプ混成。安定性を損なうため Tyranitar 単軸に絞った。
+
+── TR 専用カード ────────────────────────────────────────────────────────────
+Ariana(1216): 手札が5枚になるまで引く。全 TR 場なら8枚。
+Proton(1220): 先攻1ターン目も使用可。たね TR ポケモンを3枚サーチ。
+TR Receiver(1134): TR サポートを1枚サーチ（主に Ariana / Giovanni）。
+TR Super Ball(1132): コイン表→進化 TR・裏→たね TR を山札から1枚。
+Petrel(1219): 任意トレーナーズ1枚サーチ（Night Stretcher / Factory 等）。
+Giovanni(1218): 自陣 TR 入れ替え＋相手ベンチを引き出す。プライズ有利狙い。
+TR Factory(1257): TR サポートを使ったターン、さらに2枚ドロー。Ariana と相性◎。
+Night Stretcher(1097): トラッシュからポケモン回収。
+Poké Pad(1152): 非ルールポケモン（Tyranitar 含む）をサーチ。
 """
 from __future__ import annotations
 
@@ -38,20 +64,21 @@ except Exception:
 
 # ── Card IDs ──────────────────────────────────────────────────────────────────
 class C:
-    RIOLU          = 677
-    MEGA_LUCARIO   = 678
-    HIPPOPOTAS     = 22   # ヒポポタス (たね・HP90)
-    HIPPOWDON      = 23   # カバルドン (1進化・HP160・おおすなあらし闘闘●150dmg)
-    CRUSTLE        = 345  # イワパレス — 特性でex攻撃を完全無効化
-    FIGHTING_ENERGY= 6
-    ULTRA_BALL     = 1121
-    LILLIE_DET     = 1227
-    CANARI         = 1233
-    NIGHT_STRETCHER= 1097
-    POKE_PAD       = 1152
-    LEVINCIA       = 1254
-    MAX_ROD        = 1110
-    ENERGY_RET     = 1118
+    LARVITAR        = 440   # ロケット団のヨーギラス HP70 (たね)
+    PUPITAR         = 441   # ロケット団のサナギラス HP100 (1進化) ←自己進化攻撃
+    TYRANITAR       = 442   # ロケット団のバンギラス HP180 (2進化) ←主力
+    FIGHTING_ENERGY = 6
+    TR_ENERGY       = 15    # ロケット団エネルギー: 特殊、TR のみ装着、2エネ分
+    ARIANA          = 1216  # ロケット団のアテナ: draw to 5 (全TR場なら8)
+    ARCHER          = 1217  # ロケット団のアポロ: TR きぜつ後に使用可、両者シャッフルドロー
+    GIOVANNI        = 1218  # ロケット団のサカキ: TR 入れ替え＋相手ベンチ引き出し
+    PETREL          = 1219  # ロケット団のラムダ: 任意トレーナーズサーチ
+    PROTON          = 1220  # ロケット団のランス: T1 可、たね TR 最大3枚サーチ
+    TR_RECEIVER     = 1134  # ロケット団のレシーバー: TR サポートサーチ
+    TR_SUPER_BALL   = 1132  # ロケット団のスーパーボール: コイン→TR ポケモンサーチ
+    TR_FACTORY      = 1257  # ロケット団のファクトリー: TR サポ使用後+2ドロー/turn
+    NIGHT_STRETCHER = 1097  # 夜のタンカ: トラッシュ回収
+    POKE_PAD        = 1152  # ポケパッド: 非ルールポケモンサーチ
 
 
 LOW_DECK_COUNT = 6
@@ -210,7 +237,7 @@ def _build_predictions(obs):
 
 
 def _evaluate_obs(obs):
-    """1-ply search の評価関数。v6: Crustle対面でカバルドンの価値を加算。"""
+    """1-ply search 評価関数。Tyranitar の攻撃準備状態を重視。"""
     if obs is None or obs.current is None: return 0
     state  = obs.current
     my_idx = state.yourIndex
@@ -222,26 +249,16 @@ def _evaluate_obs(obs):
 
     score = (len(opp.prize) - len(me.prize)) * 8_000
 
-    # 相手の場にCrustleがいるか（単純判定）
-    opp_has_crustle = any(p and p.id == C.CRUSTLE for p in opp.active + opp.bench)
-
     for p in me.active + me.bench:
         if p is None: continue
         ec = len(p.energies)
-        if p.id == C.MEGA_LUCARIO:
-            score += 4_000 + ec * 500
-            if ec >= 2: score += 1_000
-        elif p.id == C.RIOLU:
-            score += 500
-        elif p.id == C.HIPPOWDON:
-            # Crustle対面ではカバルドンに高い価値をつける
-            if opp_has_crustle:
-                score += 3_500 + ec * 900
-                if ec >= 3: score += 1_500  # 攻撃可能
-            else:
-                score += 600 + ec * 200
-        elif p.id == C.HIPPOPOTAS:
-            score += 300 if opp_has_crustle else 80
+        if p.id == C.TYRANITAR:
+            score += 5_000 + ec * 600
+            if ec >= 4: score += 2_000   # ぶちぬきタックル可能
+        elif p.id == C.PUPITAR:
+            score += 1_500 + ec * 200
+        elif p.id == C.LARVITAR:
+            score += 600
 
     opp_a = opp.active[0] if opp.active else None
     if opp_a:
@@ -259,7 +276,7 @@ def _greedy_resolve(state, my_orig_idx, depth=0):
     if obs.current.yourIndex != my_orig_idx: return state
     if obs.select.maxCount == 0 or not obs.select.option: return state
     try:
-        policy = LucarioPolicy(obs)
+        policy = TRDarkPolicy(obs)
         choices = policy.choose()
         if not choices: return state
         nxt = _search_step(state.searchId, choices)
@@ -285,7 +302,7 @@ def _run_lookahead(obs):
     except Exception:
         return None
 
-    p0 = LucarioPolicy(obs)
+    p0 = TRDarkPolicy(obs)
     h = [p0._score_option(o) for o in obs.select.option]
     n = len(obs.select.option)
     top_k = sorted(range(n), key=lambda i: h[i], reverse=True)[:SEARCH_TOP_K]
@@ -309,8 +326,8 @@ def _run_lookahead(obs):
     return best_idx
 
 
-# ── Lucario v6 policy ──────────────────────────────────────────────────────────
-class LucarioPolicy:
+# ── TR Dark policy ────────────────────────────────────────────────────────────
+class TRDarkPolicy:
     def __init__(self, obs):
         self.obs      = obs
         self.state    = obs.current
@@ -345,27 +362,35 @@ class LucarioPolicy:
         try: return len(pokemon.energies)
         except: return 0
 
-    def _lucario_count(self):
-        return sum(1 for p in self._my_board() if p and p.id == C.MEGA_LUCARIO)
+    def _energy_value(self, pokemon):
+        """TR Energy は2エネ分としてカウント。"""
+        try:
+            ec = 0
+            for e in pokemon.energies:
+                ec += 2 if getattr(e, "id", None) == C.TR_ENERGY else 1
+            return ec
+        except:
+            return 0
 
-    def _hippowdon_count(self):
-        return sum(1 for p in self._my_board() if p and p.id == C.HIPPOWDON)
+    def _tyranitar_count(self):
+        return sum(1 for p in self._my_board() if p and p.id == C.TYRANITAR)
 
-    # ── v6 コアメソッド：Crustle検出 ─────────────────────────────────────────
-    def _crustle_on_opp_field(self) -> bool:
-        """相手の場（バトル場 + ベンチ）にCrustle(id=345)がいるか。単純判定。"""
-        return any(p and p.id == C.CRUSTLE for p in self._opp_board())
+    def _pupitar_count(self):
+        return sum(1 for p in self._my_board() if p and p.id == C.PUPITAR)
 
-    def _hippowdon_ready(self) -> bool:
-        """攻撃可能なカバルドン（エネルギー3個以上）がいるか。"""
-        return any(p and p.id == C.HIPPOWDON and self._energy_count(p) >= 3
-                   for p in self._my_board())
+    def _larvitar_count(self):
+        return sum(1 for p in self._my_board() if p and p.id == C.LARVITAR)
 
-    def _attack_ids(self):
-        data = card_table.get(C.MEGA_LUCARIO)
-        if data is None or not hasattr(data, "attacks") or len(data.attacks) < 2:
-            return None, None
-        return data.attacks[0], data.attacks[1]
+    def _all_field_tr(self) -> bool:
+        """場のポケモン全員が TR ポケモンか（Ariana の8ドロー条件）。"""
+        for p in self.me.active + self.me.bench:
+            if p is None: continue
+            d = card_table.get(p.id)
+            # TR ポケモンは ID 440-900 台。エンジン上の判定はカードデータに依存。
+            # ここでは「自分のデッキに含まれる ID のポケモンのみ」で代替判定。
+            if p.id not in (C.LARVITAR, C.PUPITAR, C.TYRANITAR):
+                return False
+        return True
 
     # ── Main scorer ────────────────────────────────────────────────────────────
     def rank(self):
@@ -405,62 +430,76 @@ class LucarioPolicy:
 
     def _score_play_pokemon(self, card) -> float:
         n = self.field_counts[card.id]
-        crustle_threat = self._crustle_on_opp_field()
-
-        if card.id == C.RIOLU:
-            return 20000 - 300 * n if self._open_bench() else -1
-        if card.id == C.HIPPOPOTAS:
-            # Crustle対面なら高優先（カバルドンへの進化ラインを早期確立）
-            if crustle_threat and self._hippowdon_count() == 0:
-                return 18000 - 200 * n if self._open_bench() else -1
-            return 8000 - 200 * n if self._open_bench() else -1
+        if card.id == C.LARVITAR:
+            # Larvitar 4枚体制。冗長展開最優先（crustle教訓）。
+            return 22000 - 300 * n if self._open_bench() else -1
+        if card.id == C.PUPITAR:
+            # Pupitar は直接プレイしない（Larvitar からの進化）
+            return -1
         return 15000 - 200 * n
 
     def _score_play_trainer(self, card) -> float:
         cid = card.id
-        crustle_threat = self._crustle_on_opp_field()
 
-        if cid == C.LILLIE_DET:
-            if self.state.supporterPlayed or self._low_deck(): return -1
-            return 12000 if self._hand_size() <= 4 else 3000
-
-        if cid == C.CANARI:
+        # ── サポート ─────────────────────────────────────────────────────────
+        if cid == C.PROTON:
             if self.state.supporterPlayed: return -1
-            # Crustle対面ではカバルドンラインの確保を優先
-            if crustle_threat and self._hippowdon_count() == 0:
-                return 12000
-            need = self._lucario_count() < 2
-            return 11000 if need else (9500 if self._hand_size() <= 3 else 1500)
+            # T1 に3体 Larvitar を集めるのが最優先
+            larvitar_on_field = self._larvitar_count()
+            return 20000 if larvitar_on_field < 3 else 5000
 
-        if cid == C.ULTRA_BALL:
-            need = self._lucario_count() < 2 or self.field_counts[C.RIOLU] < 2
-            if crustle_threat and self._hippowdon_count() == 0:
-                need = True
-            return 10000 if need and self._hand_size() >= 3 else 500
+        if cid == C.ARIANA:
+            if self.state.supporterPlayed or self._low_deck(): return -1
+            # 全TR場なら8枚引ける
+            if self._all_field_tr() and self._hand_size() <= 6:
+                return 15000
+            return 12000 if self._hand_size() <= 4 else 4000
+
+        if cid == C.GIOVANNI:
+            if self.state.supporterPlayed: return -1
+            # 使うならプライズ有利確保または苦手ポケをどかすとき
+            return 8000
+
+        if cid == C.PETREL:
+            if self.state.supporterPlayed: return -1
+            # Night Stretcher / Factory が欲しいとき
+            return 7000
+
+        if cid == C.ARCHER:
+            # TR ポケモンがきぜつした後のみ使用可能（エンジンが条件チェックする）
+            if self.state.supporterPlayed: return -1
+            return 6000
+
+        # ── グッズ ─────────────────────────────────────────────────────────
+        if cid == C.TR_RECEIVER:
+            # TR サポートをサーチ（主に Ariana）
+            has_ariana = self.hand_counts.get(C.ARIANA, 0) == 0
+            return 11000 if has_ariana else 4000
+
+        if cid == C.TR_SUPER_BALL:
+            # コイン表→進化 TR / 裏→たね TR: どちらも有益
+            need = (self._tyranitar_count() < 2 or
+                    self._pupitar_count() + self._larvitar_count() < 2)
+            return 12000 if need else 5000
+
+        if cid == C.TR_FACTORY:
+            # スタジアム枠。TR サポートと毎ターン相性◎ → 早期設置優先
+            if self.state.stadiumPlayed: return -1
+            return 9000
 
         if cid == C.NIGHT_STRETCHER:
-            has_lucario   = self.disc_counts.get(C.MEGA_LUCARIO, 0) > 0
-            has_riolu     = self.disc_counts.get(C.RIOLU, 0) > 0
-            has_hippowdon = self.disc_counts.get(C.HIPPOWDON, 0) > 0
-            if crustle_threat and has_hippowdon:
-                return 10000
-            return 9000 if has_lucario else (7000 if has_riolu else 300)
+            has_tyran  = self.disc_counts.get(C.TYRANITAR, 0) > 0
+            has_pupitar = self.disc_counts.get(C.PUPITAR, 0) > 0
+            has_larvi  = self.disc_counts.get(C.LARVITAR, 0) > 0
+            if has_tyran: return 10000
+            if has_pupitar: return 7500
+            if has_larvi: return 5000
+            return 300
 
         if cid == C.POKE_PAD:
-            if crustle_threat and self._hippowdon_count() == 0:
-                return 9000  # カバルドンをサーチ
-            return 8000 if self._lucario_count() < 2 else 400
-
-        if cid == C.ENERGY_RET:
-            fe_disc = self.disc_counts.get(C.FIGHTING_ENERGY, 0)
-            return 6000 if fe_disc >= 3 else 1000
-
-        if cid == C.MAX_ROD:
-            return 5000 if self.me.deckCount <= 10 else 400
-
-        if cid == C.LEVINCIA:
-            if self.state.stadiumPlayed: return -1
-            return 3000
+            # 非ルールポケモン = Tyranitar もサーチできる
+            need = self._tyranitar_count() == 0 and self._pupitar_count() >= 1
+            return 9500 if need else 3000
 
         return 7000
 
@@ -471,12 +510,12 @@ class LucarioPolicy:
         card = get_card(self.obs, AreaType.HAND, option.index, self.my_index)
         if card is None: return 0
 
-        if card.id == C.MEGA_LUCARIO:
+        if card.id == C.TYRANITAR:
+            # 手札から直接進化（通常進化ルート）。最高優先。
             return 25000 + self._energy_count(target) * 50
-        if card.id == C.HIPPOWDON:
-            # Crustle対面なら最優先で進化
-            bonus = 5000 if self._crustle_on_opp_field() else 0
-            return 22000 + self._energy_count(target) * 50 + bonus
+        if card.id == C.PUPITAR:
+            # Larvitar → Pupitar 進化。
+            return 23000 + self._energy_count(target) * 50
         return 18000
 
     # ── Attach ────────────────────────────────────────────────────────────────
@@ -486,59 +525,49 @@ class LucarioPolicy:
         return self._energy_score(pokemon, option.inPlayArea == AreaType.ACTIVE)
 
     def _energy_score(self, pokemon, is_active) -> float:
-        ec = self._energy_count(pokemon)
-        crustle_threat = self._crustle_on_opp_field()
+        ev = self._energy_value(pokemon)  # TR Energy は2エネとしてカウント
 
-        if pokemon.id == C.MEGA_LUCARIO:
-            base = 9000 if ec < 2 else 500
-            # Crustle対面ではルカリオにエネを積む優先度を下げる（攻撃できないため）
-            if crustle_threat:
-                base = max(base - 4000, 100)
-        elif pokemon.id == C.HIPPOWDON:
-            if crustle_threat:
-                # activeに立ったカバルドンへ最優先でエネを積む（3エネで攻撃可能）
-                base = 25000 if is_active and ec < 3 else (9500 if ec < 3 else 200)
-            else:
-                base = 2000 if ec < 3 else 100
-        elif pokemon.id == C.HIPPOPOTAS:
-            base = 50  # Hippopotasにはエネを積まない（進化させる）
-        elif pokemon.id == C.RIOLU:
-            base = 100
+        if pokemon.id == C.TYRANITAR:
+            # ぶちぬきタックル要件: 4エネ（闘●●●）
+            # TR Energy 2枚+Fighting 1枚 = 5要件 = 十分
+            base = 10000 if ev < 4 else 300
+        elif pokemon.id == C.PUPITAR:
+            # ばくれつかくせい要件: 1エネ
+            # 進化攻撃のために最低1エネ欲しい
+            base = 8000 if ev == 0 else 200
+        elif pokemon.id == C.LARVITAR:
+            # 攻撃コスト: ●1
+            base = 300 if ev == 0 else 50
         else:
             base = 50
-        return base + (200 if is_active else 0)
+        return base + (300 if is_active else 0)
 
     # ── Retreat ───────────────────────────────────────────────────────────────
     def _score_retreat(self) -> float:
         active = self.me.active[0] if self.me.active else None
         if active is None: return -1
-        crustle_threat = self._crustle_on_opp_field()
 
-        if active.id == C.MEGA_LUCARIO:
-            if crustle_threat:
-                # Crustle対面: カバルドンがベンチで2エネ溜まったら交代
-                # ・0エネ交代(r2)→即2発KO でアタック機会ゼロが死因
-                # ・2エネ持って出れば: 1T目おおすなあらし(3枚目アタッチ後)or ぶつかる → 2T目KO
-                # ・グレートシザー120×2発でKO(160→40→0)の耐久と合致
-                has_hippo_2en = any(p and p.id == C.HIPPOWDON and self._energy_count(p) >= 2
-                                    for p in self.me.bench)
-                if has_hippo_2en:
-                    return 30000  # Lucario最高攻撃スコア(~5600)を確実に上回る
-            if self._energy_count(active) >= 1 and not crustle_threat:
-                return -1  # 通常: ルカリオは攻撃継続
+        if active.id == C.TYRANITAR:
+            # Tyranitar はアクティブで殴り続ける
             return -1
 
-        if active.id == C.HIPPOWDON:
-            # カバルドンはactiveに居続ける（攻撃するまで退場しない）
+        if active.id == C.PUPITAR:
+            # Pupitar は1エネ貯まれば攻撃（進化）の方が優先。攻撃できない状況なら退場。
+            ev = self._energy_value(active)
+            if ev == 0:
+                # エネなし Pupitar は下げる
+                for p in self.me.bench:
+                    if p and p.id == C.TYRANITAR:
+                        return 8000
             return -1
 
-        if active.id == C.RIOLU or active.id == C.HIPPOPOTAS:
-            # バトル場に出てしまったたねを下げる
+        if active.id == C.LARVITAR:
+            # Larvitar がアクティブ → Pupitar/Tyranitar があれば入れ替える
             for p in self.me.bench:
-                if p and p.id == C.HIPPOWDON and crustle_threat:
-                    return 9000
-                if p and p.id == C.MEGA_LUCARIO and self._energy_count(p) >= 1:
-                    return 7000
+                if p and p.id == C.TYRANITAR: return 9000
+                if p and p.id == C.PUPITAR and self._energy_value(p) >= 1: return 7000
+            return 3000
+
         return -1
 
     # ── Attack ────────────────────────────────────────────────────────────────
@@ -546,45 +575,37 @@ class LucarioPolicy:
         active = self.me.active[0] if self.me.active else None
         opp_a  = self.opponent.active[0] if self.opponent.active else None
         if active is None: return 500
-        crustle_threat = self._crustle_on_opp_field()
 
-        # ── カバルドンの攻撃 ──────────────────────────────────────────────────
-        if active.id == C.HIPPOWDON:
-            dmg = 150  # おおすなあらし
-            score = 4000 + min(dmg, 340)
-            if opp_a and opp_a.hp <= dmg:
-                score += 3000 + prize_count(opp_a) * 500
-            if crustle_threat:
-                score += 6000  # Crustle対面では最優先
+        # ── Pupitar の攻撃（ばくれつかくせい: 1エネ/30dmg+Tyranitar 即進化） ─
+        if active.id == C.PUPITAR:
+            # 常に使う（Tyranitar への変身攻撃が最善）
+            score = 6000 + 30   # 高スコアで確実に選択
+            if opp_a and opp_a.hp <= 30:
+                score += 1000
             return score
 
-        # ── Mega Lucario ex の攻撃 ────────────────────────────────────────────
-        if active.id != C.MEGA_LUCARIO:
+        # ── Larvitar の攻撃（●/10+山札トップトラッシュ） ────────────────────
+        if active.id == C.LARVITAR:
+            # 使えるなら使う（受動的）
+            return 3000
+
+        # ── Tyranitar の攻撃（ぶちぬきタックル: 闘●●●/180dmg+エネトラッシュ）─
+        if active.id != C.TYRANITAR:
             return 500
 
-        # Crustle対面でルカリオが攻撃しても0ダメ → 大きくペナルティ
-        if crustle_threat and opp_a and opp_a.id == C.CRUSTLE:
-            return -5000
+        ev = self._energy_value(active)
+        if ev < 4:
+            # エネ不足: まだ攻撃しない（エネを貯める）
+            return -1
 
-        aura_id, brave_id = self._attack_ids()
-
-        if option.attackId == brave_id:
-            dmg = 270
-            score = 5000 + min(dmg, 340)
-            if opp_a and opp_a.hp <= dmg:
-                score += 3000 + prize_count(opp_a) * 500
-        elif option.attackId == aura_id:
-            dmg = 130
-            bench_lucarios = sum(1 for p in self.me.bench
-                                 if p and p.id == C.MEGA_LUCARIO
-                                 and self._energy_count(p) < 2)
-            ramp_value = bench_lucarios * 1200
-            score = 3000 + min(dmg, 340) + ramp_value
-            if opp_a and opp_a.hp <= dmg:
-                score += 3000 + prize_count(opp_a) * 500
-        else:
-            score = 500
-
+        dmg = 180
+        score = 5500 + min(dmg, 340)
+        if opp_a:
+            if opp_a.hp <= dmg:
+                score += 3000 + prize_count(opp_a) * 1000
+            # エネを剥ぐことで相手の攻撃準備を妨害
+            if len(getattr(opp_a, "energies", [])) >= 2:
+                score += 500
         return score
 
     # ── Card choice ───────────────────────────────────────────────────────────
@@ -596,8 +617,7 @@ class LucarioPolicy:
         if ctx in (SelectContext.SWITCH, SelectContext.TO_ACTIVE):
             return self._score_active_switch(option, card)
         if ctx == SelectContext.SETUP_ACTIVE_POKEMON:
-            if isinstance(card, Pokemon) and card.id == C.RIOLU: return 6
-            if isinstance(card, Pokemon) and card.id == C.HIPPOPOTAS: return 3
+            if isinstance(card, Pokemon) and card.id == C.LARVITAR: return 6
             return 1
         if ctx in (SelectContext.SETUP_BENCH_POKEMON, SelectContext.TO_BENCH, SelectContext.TO_FIELD):
             return self._score_to_bench(card)
@@ -622,76 +642,62 @@ class LucarioPolicy:
     def _score_active_switch(self, option, card) -> float:
         if not isinstance(card, Pokemon): return 0
         if option.playerIndex == self.op_index:
-            return 5000 + prize_count(card) * 1000
-        ec = self._energy_count(card)
-        crustle_threat = self._crustle_on_opp_field()
-        if card.id == C.HIPPOWDON:
-            # Crustle対面: エネ有無に関わらず最優先でactiveへ
-            return 20000 + ec * 100 if crustle_threat else 200 + ec * 50
-        if card.id == C.MEGA_LUCARIO: return 300 + ec * 100
-        return ec * 10 + 1
+            # Giovanni で相手ベンチ引き出し: HP が低いか、プライズが多いポケモンを狙う
+            hp_remaining = getattr(card, "hp", 999)
+            return 5000 + prize_count(card) * 1000 + (200 - min(hp_remaining, 200))
+        # 自分側: Tyranitar を最優先でアクティブへ
+        ev = self._energy_value(card)
+        if card.id == C.TYRANITAR: return 20000 + ev * 200
+        if card.id == C.PUPITAR:   return 10000 + ev * 100
+        if card.id == C.LARVITAR:  return 1000  + ev * 50
+        return ev * 10 + 1
 
     def _score_to_bench(self, card) -> float:
         if not isinstance(card, Pokemon): return 0
         n = self.field_counts[card.id]
-        if card.id == C.RIOLU:       return 200 - 40 * n
-        if card.id == C.MEGA_LUCARIO:return 150 - 30 * n
-        if card.id == C.HIPPOPOTAS:  return 120 - 30 * n
-        if card.id == C.HIPPOWDON:   return 100 - 20 * n
+        if card.id == C.LARVITAR:   return 200 - 40 * n
+        if card.id == C.TYRANITAR:  return 180 - 30 * n
+        if card.id == C.PUPITAR:    return 150 - 30 * n
         return 50
 
     def _score_to_hand(self, card) -> float:
         if card is None: return 0
         cid = card.id
-        crustle_threat = self._crustle_on_opp_field()
-        s = 150 - self.hand_counts[cid] * 60
+        s = 150 - self.hand_counts.get(cid, 0) * 60
 
-        if cid == C.MEGA_LUCARIO:
-            if self.field_counts[C.RIOLU] >= 1 and self._lucario_count() < 1:
-                s += 400
-            elif self.field_counts[C.RIOLU] >= 1:
-                s += 200
-            else:
-                s += 50
-        elif cid == C.RIOLU:
-            total = self.field_counts[C.RIOLU] + self._lucario_count()
-            s += 300 if total < 1 else (150 if total < 2 else -20)
-        elif cid == C.HIPPOWDON:
-            if crustle_threat:
-                # カバルドンが手札にないなら高優先でサーチ
-                s += 350 if self._hippowdon_count() == 0 else 100
-            else:
-                s += 80
-        elif cid == C.HIPPOPOTAS:
-            if crustle_threat and self._hippowdon_count() == 0:
-                s += 200
-            else:
-                s += 60
-        elif cid == C.FIGHTING_ENERGY:
-            s += 40
+        if cid == C.TYRANITAR:
+            s += 400 if self._tyranitar_count() < 1 else 150
+        elif cid == C.PUPITAR:
+            s += 300 if self._pupitar_count() < 2 else 50
+        elif cid == C.LARVITAR:
+            total = self._larvitar_count() + self._pupitar_count() + self._tyranitar_count()
+            s += 300 if total < 2 else 100
+        elif cid in (C.FIGHTING_ENERGY, C.TR_ENERGY):
+            s += 60
+        elif cid == C.ARIANA:
+            s += 200 if self.hand_counts.get(C.ARIANA, 0) == 0 else 50
         elif cid == C.NIGHT_STRETCHER:
-            s += 150 if self.disc_counts.get(C.MEGA_LUCARIO, 0) > 0 else 40
+            s += 150 if (self.disc_counts.get(C.TYRANITAR, 0) > 0 or
+                         self.disc_counts.get(C.PUPITAR, 0) > 0) else 40
         return s
 
     def _score_discard(self, card) -> float:
         if card is None: return 0
         cid = card.id
-        if cid == C.FIGHTING_ENERGY: return 80
-        if self.hand_counts[cid] >= 2: return 60
-        if cid in (C.RIOLU, C.MEGA_LUCARIO):
-            return 5 if self.field_counts[cid] > 0 else -80
-        if cid in (C.HIPPOPOTAS, C.HIPPOWDON):
-            return 5 if self.field_counts[cid] > 0 else -60
-        if cid in (C.LILLIE_DET, C.CANARI) and self.state.supporterPlayed:
+        if cid in (C.FIGHTING_ENERGY, C.TR_ENERGY): return 80
+        if self.hand_counts.get(cid, 0) >= 2: return 60
+        if cid in (C.LARVITAR, C.PUPITAR, C.TYRANITAR):
+            return 5 if self.field_counts.get(cid, 0) > 0 else -80
+        if cid in (C.ARIANA, C.PROTON, C.GIOVANNI, C.PETREL) and self.state.supporterPlayed:
             return 30
         return 5
 
     def _score_putback(self, card) -> float:
         if card is None: return 0
         cid = card.id
-        if cid in (C.RIOLU, C.MEGA_LUCARIO, C.HIPPOPOTAS, C.HIPPOWDON): return -40
-        if self.hand_counts[cid] >= 2:   return 50
-        if cid == C.FIGHTING_ENERGY:     return 20
+        if cid in (C.LARVITAR, C.PUPITAR, C.TYRANITAR): return -40
+        if self.hand_counts.get(cid, 0) >= 2: return 50
+        if cid in (C.FIGHTING_ENERGY, C.TR_ENERGY): return 20
         return 10
 
 
@@ -715,7 +721,7 @@ def agent(obs_dict: dict) -> list[int]:
             return my_deck
 
         try:
-            policy = LucarioPolicy(obs)
+            policy = TRDarkPolicy(obs)
 
             search_idx = None
             try:

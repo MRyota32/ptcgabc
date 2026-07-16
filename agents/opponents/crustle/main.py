@@ -147,6 +147,9 @@ class CrustlePolicy:
     def _crustle_ready(self):
         return sum(1 for p in self._board()
                    if p and p.id == C.IWAPARESU and _ec(p) >= 3)
+    def _is_early_game(self) -> bool:
+        """序盤判定: 場にイワパレスがまだ存在しない（壁未確立）"""
+        return self._crustle_count() == 0
 
     def choose(self):
         if not self.select.option or self.select.maxCount == 0:
@@ -182,6 +185,10 @@ class CrustlePolicy:
     def _play_pokemon(self, card) -> float:
         if card.id == C.ISHIZUMAI:
             n = self.field_cnt[C.ISHIZUMAI]
+            # 序盤（壁未確立）: イシズマイを2体展開することが最優先
+            # 1体狩られても2体目が進化できる冗長性を作る
+            if self._is_early_game() and n < 2:
+                return 22000 - 500 * n if self._open_bench() else -1
             return 15000 - 200 * n if self._open_bench() else -1
         return 5000 if self._open_bench() else -1
 
@@ -195,6 +202,9 @@ class CrustlePolicy:
 
         if cid == C.KAKITSUBA:
             if self.state.supporterPlayed: return -1
+            # 序盤: イワパレスを立てるためのカード確保を優先
+            if self._is_early_game():
+                return 13000
             return 11000 if self._crustle_count() < 3 else 3000
 
         if cid == C.TOKO:
@@ -213,27 +223,38 @@ class CrustlePolicy:
 
         # グッズ系
         if cid == C.POFFIN:
-            # ベンチにイシズマイを2枚展開
+            # 序盤: イシズマイ2体展開が最優先（冗長化。1体狩られても2体目が育つ）
+            if self._is_early_game() and self.field_cnt[C.ISHIZUMAI] < 2:
+                return 19000 if self._open_bench() else -1
             need = self.field_cnt[C.ISHIZUMAI] < 2
             return 13000 if need and self._open_bench() else 1000
 
         if cid == C.MUSHI_SET:
-            # 草ポケモンとエネルギーをサーチ (top7から2枚)
+            # 序盤: デッキトップ7からイシズマイ/イワパレスを引く
+            if self._is_early_game():
+                return 12000
             return 9000 if self._crustle_count() < 3 else 4000
 
         if cid == C.POKE_PAD:
-            # 非ルールポケモン(=イワパレス/イシズマイ)を1枚サーチ
+            # 序盤: イシズマイ不足ならサーチ最優先
+            if self._is_early_game() and self.field_cnt[C.ISHIZUMAI] < 2:
+                return 16000
             need = self._crustle_count() < 3 or self.field_cnt[C.ISHIZUMAI] < 2
             return 9500 if need else 1500
 
         if cid == C.ULTRA_BALL:
+            # 序盤: イシズマイが1体しかいない → ハイパーボールで2体目サーチ
+            if self._is_early_game() and self.field_cnt[C.ISHIZUMAI] < 2 and self._hand_size() >= 3:
+                return 15000
             need = self._crustle_count() < 2 or self.field_cnt[C.ISHIZUMAI] < 2
             return 8000 if need and self._hand_size() >= 3 else 500
 
         # スタジアム
         if cid == C.FOREST:
             if self.state.stadiumPlayed: return -1
-            # 草ポケモンが出したばかりでも進化可能になる
+            # 序盤: イシズマイがいれば即出し→即進化が可能になる（最重要）
+            if self._is_early_game() and self.field_cnt[C.ISHIZUMAI] >= 1:
+                return 18000
             return 11000 if self.field_cnt[C.ISHIZUMAI] >= 1 else 3000
 
         return 5000
@@ -346,13 +367,20 @@ class CrustlePolicy:
         cid = card.id
         s = 100 - self.hand_cnt[cid] * 40
         if cid == C.IWAPARESU:
-            if self.field_cnt[C.ISHIZUMAI] >= 1 and self._crustle_count() < 2:
+            # 序盤: イシズマイがいればイワパレスを手札に確保（次ターン即進化）
+            if self._is_early_game() and self.field_cnt[C.ISHIZUMAI] >= 1:
+                s += 600
+            elif self.field_cnt[C.ISHIZUMAI] >= 1 and self._crustle_count() < 2:
                 s += 400
             else:
                 s += 150
         elif cid == C.ISHIZUMAI:
             on_field = self.field_cnt[C.ISHIZUMAI] + self._crustle_count()
-            s += 300 if on_field < 2 else (100 if on_field < 4 else -20)
+            # 序盤: イシズマイが2体未満 → 最優先でサーチ
+            if self._is_early_game() and on_field < 2:
+                s += 500
+            else:
+                s += 300 if on_field < 2 else (100 if on_field < 4 else -20)
         elif cid in GRASS_ENERGY_IDS:
             s += 80
         return s
