@@ -1,67 +1,28 @@
-=== kangaskhan_hybrid battle_start チェックログ ===
-実施日: 2026-07-16
+=== kangaskhan_hybrid deck.csv static check ===
+Total cards: 60
 
-── 静的チェック（ローカル）─────────────────────────────────────────────
-総枚数:      60 / 60  [OK]
-4枚制限:     全カードクリア [OK]
-  ※ 草エネ(1)は基本エネルギー → 制限なし(14枚)
-  ※ 特殊エネ(11,13,14,18)は各4枚制限 → 全4枚以下 [OK]
-  ※ Mega Kangaskhan ex × 4 の合法性：測定側で確認済み（依頼書記載）
+No rule violations found.
 
-── カード構成 ─────────────────────────────────────────────────────────
-id=   1 x14  Grass Energy (基本草エネ)
-id=  11 x4   Mist Energy (ミストエネ: 無色1個+ワザ効果無効)
-id=  13 x4   Enriching Energy (リッチエネ: 無色1個+手札アタッチ時4ドロー) ★最優先
-id=  14 x2   Spiky Energy (スパイクエネ: 無色1個+攻撃者に20ダメ)
-id=  18 x4   Grow Grass Energy (グロウ草エネ: 草1個+草ポケHP+20)
-id= 344 x3   Dwebble (イシズマイ HP70 草型 / かくせい(●)で即Crustle進化)
-id= 345 x3   Crustle (イワパレス HP150 / ex攻撃完全無効壁)
-id= 756 x4   Mega Kangaskhan ex (HP300 / basic / マシンガンコンボ●●● 200+コイン×50)
-id=1086 x3   Buddy-Buddy Poffin (HP70以下たね → Dwebble 確保)
-id=1094 x3   Bug Catching Set (山札上7→草ポケ+草エネ / Dwebble+Grow草)
-id=1097 x2   Night Stretcher
-id=1147 x4   Jumbo Ice Cream (3エネ以上のバトルポケを80回復 → Kangaskhan専用)
-id=1152 x2   Poké Pad (Dwebble/Crustle サーチ)
-id=1205 x2   Cyan (Kangaskhan ex サーチ)
-id=1227 x4   Lillie's Determination
-id=1264 x2   Battle Cage (ベンチへのダメカン不可)
+ACE SPEC check:
+  id=13: x1 (OK, <=1)
 
-── エンジンチェック ────────────────────────────────────────────────────
-battle_start(deck, deck): エンジン(libcg/cg.api)はKaggle環境でのみ利用可能。
-Kaggle提出時に battle_start(DECK, DECK).errorPlayer == -1 を必ず確認すること。
+All cards:
+  id=1 x14 [basic energy, unlimited]
+  id=344 x4
+  id=345 x4
+  id=756 x4
+  id=1086 x4
+  id=1094 x4
+  id=1121 x4
+  id=1227 x4
+  id=1202 x4
+  id=18 x4
+  id=1225 x3
+  id=1210 x2
+  id=1224 x2
+  id=1152 x1
+  id=1261 x1
+  id=13 x1 [ACE SPEC, max 1]
 
-── 要確認カード（初登場）──────────────────────────────────────────────
-id=756: Mega Kangaskhan ex — ×4 の合法性は測定側で確認済み
-id=11/13/14/18: 特殊エネルギー各種 — 今回初登場（各4枚以下）
-id=1094: Bug Catching Set — 今回初登場
-id=1147: Jumbo Ice Cream — 今回初登場
-id=1264: Battle Cage (バトルコロシアム) — 今回初登場
-id=1205: Cyan (シアノ) — 今回初登場
-
-── 構築メモ ────────────────────────────────────────────────────────────
-ポリシー切替条件（シンプル2分岐）:
-  相手の場(active+bench)にex/megaExがいる
-    → Crustle をアクティブへ（しんぴのいしやど: ex攻撃を全無効）
-  それ以外（非ex相手）
-    → Kangaskhan をアクティブへ、3エネ揃ったらマシンガンコンボ
-
-エネルギー配分の意図:
-  Enriching Energy (13) x4: 手札からアタッチで4ドロー。毎ターンのアタッチが実質ドロー。
-  Mist Energy (11) x4: Kangaskhan を状態異常・効果から保護。
-  Spiky Energy (14) x2: 攻撃者に20ダメ反射。Kangaskhan が殴られるほど相手も削れる。
-  Grow Grass Energy (18) x4: Dwebble(HP70→90)/Crustle(HP150→170) のHP底上げ。
-  Grass Energy (1) x14: 残りのエネルギー枠。どのポケモンにも使える。
-
-Jumbo Ice Cream 採用理由:
-  Kangaskhan HP300 は高くても必ず削られる。3エネ到達後に80回復可能。
-  ポリシー: active が Kangaskhan で 3エネ以上、かつ HP が最大より低い → 使用。
-
-特性「おつかいダッシュ」(Run Errand) のハンドリング:
-  engine が YES/NO を提示した場合、常に YES (score=5000) を返す。
-  自動発火型の場合はエンジンが処理。
-
-vsのターゲット:
-  vs Kangaskhan(megaEx) → 自分のCrustleがex攻撃を完全無効
-  vs Lucario(ex) → 同上
-  vs zoroark(非ex) → Kangaskhan 250dmg で制圧
-  vs crustle(非ex) → Kangaskhan 250dmg で制圧（crustleはex無効を持つが攻撃者でない）
+NOTE: battle_start(deck,deck) errorPlayer==-1 must be verified on Kaggle.
+      This static check covers: 60-card count, 4-copy rule, ACE SPEC 1-copy rule.
