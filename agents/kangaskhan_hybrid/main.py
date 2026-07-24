@@ -294,21 +294,29 @@ class KangaskhanPolicy:
     def _retreat(self) -> float:
         active = self.me.active[0] if self.me.active else None
         if active is None: return -1
-        # ── ADD: Kangaskhan がアクティブで相手 Crustle → 攻撃無効なので交代 ──
+
+        # ── BENCH-CHARGE FIX: Kangaskhan は ec>=3 になるまでベンチで充電 ──
         if active.id == C.KANGASKHAN:
-            if self._opp_active_is_crustle():
+            if self._opp_active_is_crustle() or _ec(active) < 3:
+                # 相手Crustle (攻撃無効) or エネ不足 → ベンチに戻す
                 for p in self.me.bench:
                     if p and p.id in (C.IWAPARESU, C.ISHIZUMAI):
                         return 7000
-            return -1  # 相手が Crustle でなければ攻撃継続
+            return -1  # ec>=3 かつ相手が Crustle でない → 攻撃継続
+
+        # ── BENCH-CHARGE FIX: Crustle がactive でKangaskhanが3エネ完成 → バトン ──
+        if active.id == C.IWAPARESU:
+            if not self._opp_active_is_crustle():
+                for p in self.me.bench:
+                    if p and p.id == C.KANGASKHAN and _ec(p) >= 3:
+                        return 8000  # Kangaskhan 準備完了 → 前へ
+            return -1  # それ以外は Crustle 継続
+
         # イシズマイがactiveならイワパレスと交代
         if active.id == C.ISHIZUMAI:
             for p in self.me.bench:
                 if p and p.id == C.IWAPARESU and _ec(p) >= 1:
                     return 7000
-        # イワパレスはactiveのまま攻撃
-        if active.id == C.IWAPARESU and _ec(active) >= 3:
-            return -1
         return -1
 
     # ── 攻撃 ──────────────────────────────────────────────────
@@ -388,11 +396,11 @@ class KangaskhanPolicy:
             if opt.playerIndex == self.op_idx:
                 return _prize_count(card) * 2000
             ec = _ec(card)
-            # ── ADD: Kangaskhan の切り替え優先 ──
+            # ── BENCH-CHARGE FIX: Kangaskhan は ec>=3 の時だけ前に出す ──
             if card.id == C.KANGASKHAN:
-                if not self._opp_active_is_crustle():
-                    return 600 + ec * 100  # 攻撃モード: Kangaskhan を前へ
-                return 50
+                if ec >= 3 and not self._opp_active_is_crustle():
+                    return 700  # 3エネ完成 → 即出撃
+                return 50  # 未完成 → ベンチ待機
             if card.id == C.IWAPARESU: return 500 + ec * 100
             return ec * 10 + 1
 
