@@ -1,0 +1,24 @@
+=== pure_kangaskhan deck.csv static check ===
+Total cards: 60
+
+No rule violations found.
+
+ACE SPEC: id=13 (Enriching Energy) x1 (OK, <=1)
+
+Deck breakdown:
+  id=1 x23  Grass Energy
+  id=756 x4  Mega Kangaskhan ex
+  id=1227 x4  Lillie's Det
+  id=1202 x4  Drayton
+  id=1121 x4  Ultra Ball
+  id=18 x4  Grow Grass Energy
+  id=1225 x3  Hilda
+  id=1147 x3  Jumbo Ice Cream
+  id=1210 x2  Brock's
+  id=1224 x2  Cheren
+  id=1152 x2  Poke Pad
+  id=1097 x2  Night Stretcher
+  id=1264 x2  Battle Cage
+  id=13 x1  Enriching Energy [ACE SPEC]
+
+NOTE: battle_start(deck,deck) errorPlayer==-1 must be verified on Kaggle.
