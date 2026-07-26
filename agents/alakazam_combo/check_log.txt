@@ -1,0 +1,25 @@
+=== alakazam_combo deck.csv static check ===
+Total cards: 60
+
+No rule violations found.
+
+ACE SPEC: id=13 x1 (OK, <=1)
+ACE SPEC: id=1231 x1 (OK, <=1)
+
+Deck:
+  id=5 x25
+  id=741 x4
+  id=742 x4
+  id=1227 x4
+  id=1202 x4
+  id=1121 x4
+  id=743 x3
+  id=1225 x3
+  id=1224 x2
+  id=1210 x2
+  id=1152 x2
+  id=140 x1
+  id=1231 x1
+  id=13 x1
+
+NOTE: battle_start(deck,deck) errorPlayer==-1 must be verified on Kaggle.
