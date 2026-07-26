@@ -1,0 +1,33 @@
+=== tr_grimmsnarl deck.csv static check ===
+Total cards: 60
+
+No rule violations found.
+
+NOTE: Unfair Stamp(id=1080) は ACE SPEC 候補だが既知ACE SPEC IDリスト外。
+      1枚のみ採用のため問題ないが、battle_start(deck,deck) で要確認。
+
+NOTE: Team Rocket's Energy(id=15) は "Team Rocket's" ポケモン専用。
+      Marnie's Grimmsnarl ex(648) への付与不可の可能性大。
+      Spidops(401)/Tarountula(400) 専用として配分済み。
+      battle_start(deck,deck) errorPlayer==-1 で合法性を必ず確認すること。
+
+Deck:
+  id=7 x22
+  id=646 x4
+  id=1086 x4
+  id=15 x4
+  id=648 x3
+  id=1079 x3
+  id=1134 x3
+  id=400 x2
+  id=401 x2
+  id=112 x2
+  id=1219 x2
+  id=1218 x2
+  id=1152 x2
+  id=1097 x2
+  id=647 x1
+  id=1259 x1
+  id=1080 x1
+
+NOTE: battle_start(deck,deck) errorPlayer==-1 must be verified on Kaggle.
