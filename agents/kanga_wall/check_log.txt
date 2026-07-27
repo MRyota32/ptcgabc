@@ -1,0 +1,31 @@
+=== kanga_wall deck.csv static check ===
+Total cards: 60
+
+No rule violations found.
+
+ACE SPEC: id=13 x1 (OK, <=1)
+
+Deck:
+  id=1 x17
+  id=18 x4
+  id=756 x4
+  id=1120 x4
+  id=1227 x4
+  id=1202 x4
+  id=1121 x4
+  id=1225 x3
+  id=1147 x3
+  id=754 x2
+  id=1210 x2
+  id=1224 x2
+  id=1152 x2
+  id=1097 x2
+  id=1264 x2
+  id=13 x1
+
+NOTE: battle_start(deck,deck) errorPlayer==-1 must be verified on Kaggle.
+
+NOTE: 闘タイプ判定は _pokemon_etype() で card_table.eType == 6 を使用。
+      Kaggle 環境で eType フィールドが正しく取得できるか要確認。
+      取得できない場合は opp pokemon の id を既知の闘タイプIDリストと
+      照合するフォールバックへの変更を検討すること。
