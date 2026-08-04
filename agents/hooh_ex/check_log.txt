@@ -1,0 +1,21 @@
+=== hooh_ex deck.csv static check ===
+Total cards: 60
+
+No rule violations found.
+
+
+Deck:
+  id=2 x28
+  id=357 x4
+  id=1227 x4
+  id=1202 x4
+  id=1121 x4
+  id=1225 x3
+  id=1147 x3
+  id=1210 x2
+  id=1224 x2
+  id=1152 x2
+  id=1097 x2
+  id=1264 x2
+
+NOTE: battle_start(deck,deck) errorPlayer==-1 must be verified on Kaggle.
