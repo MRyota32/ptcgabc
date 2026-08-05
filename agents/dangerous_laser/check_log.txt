@@ -1,0 +1,38 @@
+=== dangerous_laser deck.csv static check ===
+Total cards: 60
+
+No rule violations found.
+
+ACE SPEC: id=1095 (Dangerous Laser) x1 (OK, <=1)
+
+Deck:
+  id=1 x19
+  id=18 x4
+  id=756 x4
+  id=1095 x1
+  id=1097 x2
+  id=1120 x4
+  id=1121 x4
+  id=1147 x3
+  id=1152 x2
+  id=1202 x4
+  id=1210 x2
+  id=1224 x2
+  id=1225 x3
+  id=1227 x4
+  id=1264 x2
+
+設計メモ:
+  disrupt_C (Crushing Hammer Kanga) から ACE SPEC を1枚差し替え:
+    Enriching Energy (13) → Dangerous Laser (1095)
+  その他のカード・枚数はすべて同一（1-card swap）
+
+  Dangerous Laser (ACE SPEC):
+    使用時に相手アクティブを「やけど+こんらん」状態付与。
+    判断フラグ不要 → null政策で問題なく機能。
+
+  エネ補填:
+    Enriching Energy (13) 抜いた1枚分を基本草(1)で補填 → 1×19
+
+NOTE: battle_start(deck, deck) errorPlayer==-1 の合法性チェックは
+      Kaggle 環境で実行して確認すること。
